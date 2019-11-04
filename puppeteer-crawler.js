@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer");
 
 const startingUrl = process.argv[2] || "http://localhost:3000/";
+const startingHost = require('url').parse(startingUrl).host
 
 function isFile(url) {
   if (url.endsWith(".png")) {
@@ -68,7 +69,7 @@ function isFile(url) {
           Array.from(document.querySelectorAll("a")).map(elm => elm.href)
         )
         // don't escape the site
-        .then(anchors => anchors.filter(a => a.includes(startingUrl)))
+        .then(anchors => anchors.filter(a => require('url').parse(a).host === startingHost))
         // don't care about anchors
         .then(anchors => anchors.map(a => a.split("#")[0]))
         // ignore files

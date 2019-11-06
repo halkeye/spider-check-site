@@ -3,13 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "description": "",
-  "main": "index.js",
+  "bin": {
+    "puppet-crawler": "puppet-crawler.js"
+  },
+  "main": "puppet-crawler.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "commander": "^4.0.0",
+    "mkdirp": "^0.5.1",
     "puppeteer": "^2.0.0"
   }
 }

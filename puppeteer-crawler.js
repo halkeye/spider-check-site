@@ -1,7 +1,18 @@
 const puppeteer = require("puppeteer");
+const program = require('commander');
+const fs = require('fs');
+const path = require('path');
+const URL = require('url');
+const mkdirp = require('mkdirp');
 
-const startingUrl = process.argv[2] || "http://localhost:3000/";
-const startingHost = require('url').parse(startingUrl).host
+let startingUrl =  "http://localhost:3000/";
+
+program.option('-l, --links <file>')
+program.version(require('./package.json').version);
+program.arguments('<startingUrl>').action(function(_startingUrl) {
+  startingUrl = _startingUrl;
+});
+program.parse(process.argv);
 
 function isFile(url) {
   if (url.endsWith(".png")) {
@@ -23,12 +34,26 @@ function isFile(url) {
 }
 
 (async () => {
+  mkdirp('screenshots')
+
+  const parsedStartingUrl = URL.parse(startingUrl);
+  const startingHost = parsedStartingUrl.host
+  const shouldQueueUrls = !program.link
+
   const startDate = new Date().getTime();
   const USER_AGENT =
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3239.108 Safari/537.36";
   const seenUrls = {};
   const urls = [startingUrl];
-
+  if (program.links) {
+    for (const url of JSON.parse(fs.readFileSync(path.join(__dirname, program.links)))) {
+      urls.push(URL.format({ 
+        ...parsedStartingUrl,
+        pathname: url.url,
+        path: url.url
+      }));
+    }
+  }
   const browser = await puppeteer.launch();
 
   let url;
@@ -78,7 +103,9 @@ function isFile(url) {
         .then(anchors => anchors.filter(a => !seenUrls[a]));
 
       anchors.forEach(a => {
-        urls.push(a);
+        if (!shouldQueueUrls) {
+          urls.push(a);
+        }
         seenUrls[a] = 1;
       });
     } catch (err) {

@@ -37,6 +37,10 @@ function isFile(url) {
   mkdirp('screenshots')
 
   const parsedStartingUrl = URL.parse(startingUrl);
+  if (!parsedStartingUrl.hostname) {
+    console.error("Invalid starting url provided")
+    process.exit(1);
+  }
   const startingHost = parsedStartingUrl.host
   const shouldQueueUrls = !program.link
 

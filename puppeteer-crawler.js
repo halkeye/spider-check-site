@@ -89,25 +89,25 @@ function isFile(url) {
         fullPage: true
       });
 
-      const anchors = await page
-        .evaluate(() =>
-          Array.from(document.querySelectorAll("a")).map(elm => elm.href)
-        )
-        // don't escape the site
-        .then(anchors => anchors.filter(a => require('url').parse(a).host === startingHost))
-        // don't care about anchors
-        .then(anchors => anchors.map(a => a.split("#")[0]))
-        // ignore files
-        .then(anchors => anchors.filter(a => !isFile(a)))
-        // ignore seen urls
-        .then(anchors => anchors.filter(a => !seenUrls[a]));
+      if (!shouldQueueUrls) {
+        const anchors = await page
+          .evaluate(() =>
+            Array.from(document.querySelectorAll("a")).map(elm => elm.href)
+          )
+          // don't escape the site
+          .then(anchors => anchors.filter(a => require('url').parse(a).host === startingHost))
+          // don't care about anchors
+          .then(anchors => anchors.map(a => a.split("#")[0]))
+          // ignore files
+          .then(anchors => anchors.filter(a => !isFile(a)))
+          // ignore seen urls
+          .then(anchors => anchors.filter(a => !seenUrls[a]));
 
-      anchors.forEach(a => {
-        if (!shouldQueueUrls) {
+        anchors.forEach(a => {
           urls.push(a);
-        }
-        seenUrls[a] = 1;
-      });
+          seenUrls[a] = 1;
+        });
+      }
     } catch (err) {
       console.log(`An error occured on url: ${url}: ${err}`);
     } finally {

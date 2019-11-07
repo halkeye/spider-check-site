@@ -88,10 +88,10 @@ function isFile(url) {
     try {
       // await page.goto(url, { waitUntil: "load" });
       const response = await page.goto(url, { waitUntil: "networkidle2" });
-      if (!urlReport[response.headers.status]) {
-        urlReport[response.headers.status] = [];
+      if (!urlReport[response.status()]) {
+        urlReport[response.status()] = [];
       }
-      urlReport[response.headers.status].push(url);
+      urlReport[response.status()].push(url);
 
       let fileName = url.replace(/(\.|\/|:|%|#)/g, "_");
       if (fileName.length > 100) {

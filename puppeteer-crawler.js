@@ -44,7 +44,9 @@ function isFile(url) {
   const USER_AGENT =
     "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3239.108 Safari/537.36";
   const seenUrls = {};
+  const urlReport = {};
   const urls = [startingUrl];
+
   if (program.links) {
     for (const url of JSON.parse(fs.readFileSync(path.join(__dirname, program.links)))) {
       urls.push(URL.format({ 
@@ -78,7 +80,11 @@ function isFile(url) {
 
     try {
       // await page.goto(url, { waitUntil: "load" });
-      await page.goto(url, { waitUntil: "networkidle2" });
+      const response = await page.goto(url, { waitUntil: "networkidle2" });
+      if (!urlReport[response.headers.status]) {
+        urlReport[response.headers.status] = [];
+      }
+      urlReport[response.headers.status].push(url);
 
       let fileName = url.replace(/(\.|\/|:|%|#)/g, "_");
       if (fileName.length > 100) {
@@ -119,4 +125,11 @@ function isFile(url) {
   console.log(
     `Time elapsed ${Math.round((new Date().getTime() - startDate) / 1000)} s`
   );
+  for (const statusCode of Object.keys(urlReport)) {
+    console.log(`${statusCode} (${urlReport[statusCode].length})`);
+    console.log("=========")
+    for (const url of urlReport[statusCode]) {
+      console.log(`\t\t${url}`);
+    }
+  }
 })();

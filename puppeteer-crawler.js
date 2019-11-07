@@ -60,7 +60,10 @@ function isFile(url) {
       }));
     }
   }
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox']
+  });
 
   let url;
   while ((url = urls.pop()) != null) {
